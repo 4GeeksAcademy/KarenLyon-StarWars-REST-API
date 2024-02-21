@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, favorite_planet
 #from models import Person
 
 app = Flask(__name__)
@@ -36,14 +36,41 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
+@app.route('/user', methods=['POST'])
+def create_user():
+    body = request.get_json()
+    user = User(email = body['email'])
+    db.session.add(user)
+    try: 
+        db.session.commit()
+        return jsonify({'response': 'ok'}), 200
+    except: 
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+        return 'error al crear el usuario', 400
 
-    return jsonify(response_body), 200
+@app.route('/users', methods=['GET'])
+def get_users():
+    all_users = User.query.all()
+    all_users = list(map(lambda x: x.serialize(), all_users))
+
+    return jsonify(all_users), 200
+
+@app.route('/favorite/Planet', methods = ['GET'])
+def get_favorite_planet():
+    planet_favorite = favorite_planet.query.all()
+    all_planet_favorite = list(map(lambda x: x.serialize(), planet_favorite))
+
+    return jsonify(all_planet_favorite), 200
+
+@app.route('/favorite/Planet', methods = ['POST'])
+def add_favorite_planet():
+    request_body_favorite_planet = request.get_json()
+    new_favorite_planet = favorite_planet(user_id = request_body_favorite_planet['user_id'], planet_id = request_body_favorite_planet['planet_id'])
+    db.session.add(new_favorite_planet)
+    db.session.commit()
+    response = {'msg': 'ok'}
+    return jsonify(response), 200
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
