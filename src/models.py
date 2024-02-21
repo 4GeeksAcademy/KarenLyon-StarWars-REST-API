@@ -41,7 +41,26 @@ class Character(db.Model):
             "homeworld": self.homeworld,
         }
 
+class favorite_character(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    character_id = db.Column(db.Integer, db.ForeignKey(Character.id))
 
+    # Establece la relación con la tabla Planet
+    character = db.relationship('Character')
+
+    def __repr__(self):
+        return f'<favorite_character user_id={self.id}>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "character_id": self.character_id,
+            
+            # Accede al nombre del planeta a través de la relación
+            "character_name": self.character.name if self.character else None
+        }
     
 class Planet(db.Model):
     __tablename__ = 'planet'
@@ -65,11 +84,12 @@ class Planet(db.Model):
 
 
 class favorite_planet(db.Model):
-    __tablename__ = 'favorite_planet'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    planet_name = db.Column(db.String(50), db.ForeignKey('planet.planet_name'))
-    planet = db.relationship('Planet', foreign_keys=[planet_name], backref='favorite_planet')
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    planet_id = db.Column(db.Integer, db.ForeignKey(Planet.id))
+
+    # Establece la relación con la tabla Planet
+    planet = db.relationship('Planet')
 
     def __repr__(self):
         return f'<favorite_planet user_id={self.id}>'
@@ -79,8 +99,11 @@ class favorite_planet(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "planet_id": self.planet_id,
-            "name": self.planet.planet_name 
+            
+            # Accede al nombre del planeta a través de la relación
+            "planet_name": self.planet.planet_name if self.planet else None
         }
+
 
 
 
@@ -102,4 +125,25 @@ def serialize(self):
             "model": self.model,
             "crew": self.crew,
             "passengers": self.passengers
+        }
+
+class favorite_vehicle(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    vehicle_id = db.Column(db.Integer, db.ForeignKey(Vehicle.id))
+
+    # Establece la relación con la tabla Planet
+    vehicle = db.relationship('Vehicle')
+
+    def __repr__(self):
+        return f'<favorite_vehicle user_id={self.id}>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "vehicle_id": self.vehicle_id,
+            
+            # Accede al nombre del planeta a través de la relación
+            "vehicle_name": self.vehicle.vehicle_name if self.vehicle else None
         }
